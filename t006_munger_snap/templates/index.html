@@ -1,0 +1,282 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Munger Snap — Four Filters</title>
+    <style>
+      :root {
+        font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+        color: #222;
+        background: #f7f7f7;
+      }
+      body {
+        margin: 0;
+        padding: 0;
+      }
+      .container {
+        max-width: 760px;
+        margin: 0 auto;
+        padding: 32px 20px 60px;
+      }
+      header {
+        margin-bottom: 24px;
+      }
+      h1 {
+        font-size: 1.8rem;
+        margin-bottom: 0.5rem;
+      }
+      p.lead {
+        margin: 0;
+        color: #555;
+      }
+      form {
+        background: #fff;
+        border-radius: 12px;
+        padding: 24px;
+        box-shadow: 0 6px 16px rgba(0,0,0,0.07);
+        display: grid;
+        gap: 16px;
+      }
+      label {
+        font-weight: 600;
+        display: block;
+        margin-bottom: 6px;
+      }
+      textarea, input[type="text"] {
+        width: 100%;
+        padding: 12px;
+        border-radius: 8px;
+        border: 1px solid #d0d6dd;
+        font-size: 1rem;
+        box-sizing: border-box;
+      }
+      textarea {
+        resize: vertical;
+        min-height: 160px;
+      }
+      .metrics {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+        gap: 12px;
+      }
+      .actions {
+        display: flex;
+        gap: 12px;
+        align-items: center;
+        flex-wrap: wrap;
+      }
+      button[type="submit"], button.copy-btn {
+        background: #111827;
+        color: #fff;
+        border: none;
+        padding: 12px 18px;
+        border-radius: 8px;
+        font-size: 1rem;
+        cursor: pointer;
+      }
+      button.copy-btn {
+        background: #1f2937;
+      }
+      .char-count {
+        font-size: 0.9rem;
+        color: #6b7280;
+        text-align: right;
+      }
+      .error {
+        margin-top: 12px;
+        color: #b91c1c;
+        font-weight: 600;
+      }
+      section.snapshot {
+        margin-top: 32px;
+        background: #fff;
+        border-radius: 12px;
+        padding: 24px;
+        box-shadow: 0 6px 16px rgba(0,0,0,0.07);
+      }
+      section.snapshot h2 {
+        margin-top: 0;
+      }
+      ul.filters {
+        list-style: none;
+        margin: 0;
+        padding: 0;
+        display: grid;
+        gap: 12px;
+      }
+      ul.filters li {
+        padding: 12px 14px;
+        border-radius: 10px;
+        border: 1px solid #e5e7eb;
+        background: #f9fafb;
+      }
+      ul.filters li.pass {
+        border-color: #22c55e;
+        background: #ecfdf5;
+      }
+      ul.filters li.fail {
+        border-color: #ef4444;
+        background: #fef2f2;
+      }
+      ul.filters li[data-status="Needs Data"], ul.filters li.needs-data {
+        border-color: #fbbf24;
+        background: #fffbeb;
+      }
+      ul.filters li strong {
+        display: block;
+        font-size: 1.05rem;
+      }
+      ul.filters li span.status {
+        font-weight: 700;
+      }
+      .details {
+        margin-top: 4px;
+        color: #374151;
+        font-size: 0.95rem;
+      }
+      .section {
+        margin-top: 18px;
+      }
+      .section h3 {
+        margin: 0 0 6px;
+      }
+      .bias-tags {
+        display: flex;
+        gap: 8px;
+        flex-wrap: wrap;
+      }
+      .bias-tags span {
+        background: #e0e7ff;
+        color: #1e3a8a;
+        padding: 6px 10px;
+        border-radius: 999px;
+        font-size: 0.9rem;
+      }
+      .posture {
+        margin-top: 20px;
+        font-size: 1.2rem;
+        font-weight: 700;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      }
+      .posture span.label {
+        letter-spacing: 0.05em;
+        text-transform: uppercase;
+        font-size: 0.85rem;
+        color: #6b7280;
+      }
+      @media (max-width: 640px) {
+        form {
+          padding: 20px;
+        }
+        section.snapshot {
+          padding: 20px;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <header>
+        <h1>Munger Snap — Four-Filter Pass</h1>
+        <p class="lead">Paste a thesis to get Understandable, Moat, Management, and Margin-of-Safety calls plus one inversion prompt.</p>
+      </header>
+      <form method="post" action="{{ url_for('snap') }}">
+        <div>
+          <label for="thesis">6–10 line thesis</label>
+          <textarea id="thesis" name="thesis" maxlength="1200" required>{{ thesis }}</textarea>
+          <div class="char-count">
+            {{ (char_count or 0) }} / 1200
+          </div>
+        </div>
+        <div class="metrics">
+          <div>
+            <label for="pe">P/E (optional)</label>
+            <input id="pe" type="text" name="pe" placeholder="e.g. 14" value="{{ pe_input }}">
+          </div>
+          <div>
+            <label for="fcf_yield">FCF Yield % (optional)</label>
+            <input id="fcf_yield" type="text" name="fcf_yield" placeholder="e.g. 6.5" value="{{ fcf_input }}">
+          </div>
+        </div>
+        <div class="actions">
+          <button type="submit">Run Four-Filters Snap</button>
+        </div>
+        {% if error %}
+          <div class="error">{{ error }}</div>
+        {% endif %}
+      </form>
+
+      {% if result %}
+        <section class="snapshot" id="snapshot">
+          <h2>Four-Filters Snapshot</h2>
+          <ul class="filters">
+            {% for name, data in result.filters.items() %}
+              {% set status_class = data.status|lower().replace(' ', '-') %}
+              <li class="{{ status_class }}" data-status="{{ data.status }}">
+                <strong>{{ name }}</strong>
+                <span class="status">{{ data.status }}</span>
+                {% if data.details %}
+                  <div class="details">{{ data.details }}</div>
+                {% endif %}
+              </li>
+            {% endfor %}
+          </ul>
+          <div class="section">
+            <h3>Invert</h3>
+            <p>{{ result.invert }}</p>
+          </div>
+          <div class="section">
+            <h3>Top Bias Risks</h3>
+            <div class="bias-tags">
+              {% for bias in result.biases %}
+                <span>{{ bias }}</span>
+              {% endfor %}
+            </div>
+          </div>
+          <div class="posture">
+            <span class="label">Posture</span>
+            <span>{{ result.posture }}</span>
+          </div>
+          <div class="section">
+            <button type="button" class="copy-btn" id="copy-snapshot" data-copy="{{ result.copy_text | replace('\n', '&#10;') }}">Copy Snapshot</button>
+            <span id="copy-feedback" style="margin-left:12px;color:#16a34a;font-weight:600;display:none;">Copied</span>
+          </div>
+        </section>
+      {% endif %}
+    </div>
+    <script>
+      const textarea = document.getElementById('thesis');
+      const charCount = document.querySelector('.char-count');
+      const copyButton = document.getElementById('copy-snapshot');
+      const copyFeedback = document.getElementById('copy-feedback');
+
+      if (textarea && charCount) {
+        const updateCount = () => {
+          charCount.textContent = `${textarea.value.length} / 1200`;
+        };
+        textarea.addEventListener('input', updateCount);
+        updateCount();
+      }
+
+      if (copyButton) {
+        copyButton.addEventListener('click', async () => {
+          const text = copyButton.getAttribute('data-copy');
+          try {
+            await navigator.clipboard.writeText(text.replace(/&#10;/g, '\n'));
+            if (copyFeedback) {
+              copyFeedback.style.display = 'inline';
+              setTimeout(() => {
+                copyFeedback.style.display = 'none';
+              }, 1800);
+            }
+          } catch (err) {
+            console.error('Copy failed', err);
+          }
+        });
+      }
+    </script>
+  </body>
+</html>
