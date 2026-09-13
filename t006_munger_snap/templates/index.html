@@ -214,7 +214,7 @@
           <h2>Four-Filters Snapshot</h2>
           <ul class="filters">
             {% for name, data in result.filters.items() %}
-              {% set status_class = data.status|lower().replace(' ', '-') %}
+              {% set status_class = data.status|lower|replace(' ', '-') %}
               <li class="{{ status_class }}" data-status="{{ data.status }}">
                 <strong>{{ name }}</strong>
                 <span class="status">{{ data.status }}</span>

@@ -3,7 +3,7 @@ from __future__ import annotations
 
 from flask import Flask, render_template, request
 
-from .logic import four_filters
+from logic import four_filters
 
 
 def create_app() -> Flask:
@@ -54,4 +54,4 @@ app = create_app()
 
 
 if __name__ == "__main__":
-    app.run(debug=True)
+    app.run(debug=True, port=5004)
